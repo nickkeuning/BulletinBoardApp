@@ -6,7 +6,8 @@ import {
   Platform,
   Image,
   Button,
-  Text
+  Text,
+  StyleSheet
 } from "react-native";
 import { ImagePicker, Permissions, Video, Constants } from "expo";
 import { NavigationEvents } from "react-navigation";
@@ -18,7 +19,8 @@ export default class ImagePickerScreen extends React.Component {
   };
   state = {
     selection: null,
-    ocrResult: null
+    ocrResult: null,
+    postVerifiedResult: null
   };
 
   async componentDidFocus() {
@@ -26,6 +28,42 @@ export default class ImagePickerScreen extends React.Component {
   }
 
   render() {
+    const cameraRender = this.renderCamera();
+
+    const { selection } = this.state;
+    const selectionRender =
+      !selection ? (null) : (this.renderSelection());
+
+    const submitButton = 
+      !selection ? (null) : (this.renderSubmitButton());
+
+    const { ocrResult } = this.state;
+    const ocrResultRender =
+      !ocrResult ? (null) : (<MonoText>{JSON.stringify(ocrResult.output)}</MonoText>);
+
+    const postResultButton =
+      !ocrResult ? (null) : (this.renderPostResultButton());
+
+    const { postVerifiedResult } = this.state;
+    const postVerifiedResultRender =
+      !postVerifiedResult ? (null) : (<MonoText>{postVerifiedResult}</MonoText>)
+
+    return (
+      <View style={styles.main}>
+        <ScrollView>
+          <NavigationEvents onDidFocus={this.componentDidFocus} />
+          {cameraRender}
+          {selectionRender}
+          {submitButton}
+          {ocrResultRender}
+          {postResultButton}
+          {postVerifiedResultRender}
+        </ScrollView>
+      </View>
+    );
+  }
+
+  renderCamera() {
     const showCamera = async () => {
       let result = await ImagePicker.launchCameraAsync({});
       if (result.cancelled) {
@@ -35,24 +73,15 @@ export default class ImagePickerScreen extends React.Component {
       }
     };
 
-    const { selection } = this.state;
-    const selectionRender =
-      !selection ? (selection) : (this.renderSelection(selection));
-
-    const submitButton = 
-      !selection ? (selection) : (this.renderSubmitButton());
-
-    return (
-      <ScrollView style={{ padding: 10 }}>
-        <NavigationEvents onDidFocus={this.componentDidFocus} />
-        <Button onPress={showCamera} title="Take Photo of Poll Tape" />
-        {selectionRender}
-        {submitButton}
-      </ScrollView>
+    return(
+      <Button onPress={showCamera} title="Take Photo of Poll Tape" />
     );
   }
 
-  renderSelection(selection) {
+  renderSelection() {
+
+    const { selection } = this.state;
+
     return (
       <View style={{ marginVertical: 16 }}>
         <View
@@ -75,7 +104,6 @@ export default class ImagePickerScreen extends React.Component {
 
   renderSubmitButton() {
     const submitImage = async () => {
-      Constants.manifest.extra.ocrEndpoint = "/api/ocr";
       const { serverAddress, serverPort, ocrEndpoint } = Constants.manifest.extra;
       const requestAddress = `http://${serverAddress}:${serverPort}${ocrEndpoint}`;
       const { selection } = this.state;
@@ -105,16 +133,51 @@ export default class ImagePickerScreen extends React.Component {
       })
     };
 
-    const ocrResultRender =
-      !this.state.ocrResult ? (this.state.ocrResult) : (
-        <MonoText>{this.state.ocrResult.output}</MonoText>
-      );
+    return (
+      <View>
+        <Button onPress={submitImage} title="Process Image" />
+      </View>
+    );
+  }
+
+  renderPostResultButton() {
+    const submitPollTape = async () => {
+      const { serverAddress, serverPort, verifiedEndpoint } = Constants.manifest.extra;
+      const requestAddress = `http://${serverAddress}:${serverPort}${verifiedEndpoint}`;
+      const { ocrResult } = this.state;
+
+      const body = JSON.stringify({"message": ocrResult.output});
+      console.log(body);
+
+      fetch(requestAddress, {
+        method: "POST",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        body
+      })
+      .then(response => response.json())
+      .then(responseJson => {
+        this.setState({ postVerifiedResult: responseJson });
+      })
+      .catch(error => {
+        console.log(error);
+      });
+    };
 
     return (
       <View>
-        <Button onPress={submitImage} title="Submit Poll Tape" />
-        {ocrResultRender}
+          <Button onPress={submitPollTape} title="Post Poll Tape" />
       </View>
     );
   }
 }
+
+
+const styles = StyleSheet.create({
+  main: {
+    padding: 10,
+    flex: 1
+  }
+});
