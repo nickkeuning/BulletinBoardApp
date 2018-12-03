@@ -129,7 +129,14 @@ export default class ImagePickerScreen extends React.Component {
         this.setState({ocrResult: responseJson});
       })
       .catch((error) => {
-        console.log(error);
+        Alert.alert(
+          'Network Request Failed',
+          'Please verify that the Server Address and Port, found in the Settings tab, are correct and that the backend server is running.',
+          [
+            {text: 'OK', onPress: () => console.log('Pressed OK')}
+          ],
+          { cancelable: false}
+        )
       })
     };
 
