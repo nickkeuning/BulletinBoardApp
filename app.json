@@ -24,7 +24,7 @@
       "supportsTablet": true
     },
     "extra": {
-      "serverAddress": "10.0.0.192",
+      "serverAddress": "35.3.50.49",
       "serverPort": 8080,
       "ocrEndpoint": "/api/ocr",
       "verifiedEndpoint": "/api/ocr/verified"
