@@ -18,7 +18,7 @@ export default class ImagePickerScreen extends React.Component {
     title: "Submit Poll Tape"
   };
   state = {
-    selection: null,
+    image: null,
     ocrResult: null,
     postVerifiedResult: null
   };
@@ -30,12 +30,11 @@ export default class ImagePickerScreen extends React.Component {
   render() {
     const cameraRender = this.renderCamera();
 
-    const { selection } = this.state;
-    const selectionRender =
-      !selection ? (null) : (this.renderSelection());
+    const { image } = this.state;
+    const imageRender = !image ? null : this.renderImage();
 
-    const submitButton = 
-      !selection ? (null) : (this.renderSubmitButton());
+    // const submitButton = 
+    //   !selection ? (null) : (this.renderSubmitButton());
 
     const { ocrResult } = this.state;
     const ocrResultRender =
@@ -53,8 +52,8 @@ export default class ImagePickerScreen extends React.Component {
         <ScrollView>
           <NavigationEvents onDidFocus={this.componentDidFocus} />
           {cameraRender}
-          {selectionRender}
-          {submitButton}
+          {imageRender}
+          {/* {submitButton} */}
           {ocrResultRender}
           {postResultButton}
           {postVerifiedResultRender}
@@ -63,13 +62,47 @@ export default class ImagePickerScreen extends React.Component {
     );
   }
 
+  OCRImage() {
+    const { serverAddress, serverPort, ocrEndpoint } = Constants.manifest.extra;
+    const requestAddress = `http://${serverAddress}:${serverPort}${ocrEndpoint}`;
+    const { image } = this.state;
+
+    let formData = new FormData();
+    let photo = { uri: image.uri, type: "image/jpg", name: "image.jpg" };
+    formData.append("image", photo);
+
+    fetch(requestAddress, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "multipart/form-data"
+      },
+      body: formData
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      this.setState({ ocrResult: responseJson });
+    })
+    .catch((error) => {
+      Alert.alert(
+        'Network Request Failed',
+        'Please verify that the Server Address and Port, found in the Settings tab, are correct and that the backend server is running.',
+        [
+          { text: 'OK', onPress: () => console.log('Pressed OK') }
+        ],
+        { cancelable: false }
+      )
+    }) 
+  }
+
   renderCamera() {
     const showCamera = async () => {
       let result = await ImagePicker.launchCameraAsync({});
       if (result.cancelled) {
-        this.setState({ selection: null });
+        this.setState({ image: null });
       } else {
-        this.setState({ selection: result });
+        this.setState({ image: result });
+        this.OCRImage();
       }
     };
 
@@ -78,74 +111,61 @@ export default class ImagePickerScreen extends React.Component {
     );
   }
 
-  renderSelection() {
+  renderImage() {
 
-    const { selection } = this.state;
+    const { image } = this.state;
 
-    return (
-      <View style={{ marginVertical: 16 }}>
-        <View
-          style={{
-            marginBottom: 10,
-            alignItems: "center",
-            justifyContent: "center",
-            flex: 1,
-            backgroundColor: "#000000"
-          }}
-        >
-          <Image
-            source={{ uri: selection.uri }}
-            style={{ width: 300, height: 300, resizeMode: "contain" }}
-          />
+    return <View style={{ marginVertical: 16 }}>
+        <View style={{ marginBottom: 10, alignItems: "center", justifyContent: "center", flex: 1, backgroundColor: "#000000" }}>
+          <Image source={{ uri: image.uri }} style={{ width: 300, height: 300, resizeMode: "contain" }} />
         </View>
-      </View>
-    );
+      </View>;
   }
 
-  renderSubmitButton() {
-    const submitImage = async () => {
-      const { serverAddress, serverPort, ocrEndpoint } = Constants.manifest.extra;
-      const requestAddress = `http://${serverAddress}:${serverPort}${ocrEndpoint}`;
-      const { selection } = this.state;
+  // renderSubmitButton() {
+  //   const submitImage = async () => {
+  //     const { serverAddress, serverPort, ocrEndpoint } = Constants.manifest.extra;
+  //     const requestAddress = `http://${serverAddress}:${serverPort}${ocrEndpoint}`;
+  //     const { selection } = this.state;
 
-      let formData = new FormData();
-      let photo = {
-        uri: selection.uri,
-        type: "image/jpg",
-        name: "image.jpg"
-      }
-      formData.append("image", photo);
+  //     let formData = new FormData();
+  //     let photo = {
+  //       uri: selection.uri,
+  //       type: "image/jpg",
+  //       name: "image.jpg"
+  //     }
+  //     formData.append("image", photo);
 
-      fetch(requestAddress, {
-        method: "POST",
-        headers: {
-          "Accept": "application/json",
-          "Content-Type": "multipart/form-data"
-        },
-        body: formData
-      })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({ocrResult: responseJson});
-      })
-      .catch((error) => {
-        Alert.alert(
-          'Network Request Failed',
-          'Please verify that the Server Address and Port, found in the Settings tab, are correct and that the backend server is running.',
-          [
-            {text: 'OK', onPress: () => console.log('Pressed OK')}
-          ],
-          { cancelable: false}
-        )
-      })
-    };
+  //     fetch(requestAddress, {
+  //       method: "POST",
+  //       headers: {
+  //         "Accept": "application/json",
+  //         "Content-Type": "multipart/form-data"
+  //       },
+  //       body: formData
+  //     })
+  //     .then((response) => response.json())
+  //     .then((responseJson) => {
+  //       this.setState({ocrResult: responseJson});
+  //     })
+  //     .catch((error) => {
+  //       Alert.alert(
+  //         'Network Request Failed',
+  //         'Please verify that the Server Address and Port, found in the Settings tab, are correct and that the backend server is running.',
+  //         [
+  //           {text: 'OK', onPress: () => console.log('Pressed OK')}
+  //         ],
+  //         { cancelable: false}
+  //       )
+  //     })
+  //   };
 
-    return (
-      <View>
-        <Button onPress={submitImage} title="Process Image" />
-      </View>
-    );
-  }
+  //   return (
+  //     <View>
+  //       <Button onPress={submitImage} title="Process Image" />
+  //     </View>
+  //   );
+  // }
 
   renderPostResultButton() {
     const submitPollTape = async () => {
