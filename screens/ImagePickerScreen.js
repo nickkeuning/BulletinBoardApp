@@ -20,7 +20,8 @@ export default class ImagePickerScreen extends React.Component {
   state = {
     image: null,
     ocrResult: null,
-    postVerifiedResult: null
+    postVerifiedResult: null,
+    processingOCR: false
   };
 
   async componentDidFocus() {
@@ -33,15 +34,15 @@ export default class ImagePickerScreen extends React.Component {
     const { image } = this.state;
     const imageRender = !image ? null : this.renderImage();
 
-    // const submitButton = 
-    //   !selection ? (null) : (this.renderSubmitButton());
+    const { processingOCR } = this.state;
+    const procOcrRender = !processingOCR ? (null) : (<Text>Loading, please wait...</Text>);
 
     const { ocrResult } = this.state;
     const ocrResultRender =
       !ocrResult ? (null) : (<MonoText>{JSON.stringify(ocrResult.output)}</MonoText>);
 
-    const postResultButton =
-      !ocrResult ? (null) : (this.renderPostResultButton());
+    const confirmButtons =
+      !ocrResult ? (null) : (this.renderConfirmButtons());
 
     const { postVerifiedResult } = this.state;
     const postVerifiedResultRender =
@@ -53,9 +54,9 @@ export default class ImagePickerScreen extends React.Component {
           <NavigationEvents onDidFocus={this.componentDidFocus} />
           {cameraRender}
           {imageRender}
-          {/* {submitButton} */}
+          {procOcrRender}
           {ocrResultRender}
-          {postResultButton}
+          {confirmButtons}
           {postVerifiedResultRender}
         </ScrollView>
       </View>
@@ -71,6 +72,7 @@ export default class ImagePickerScreen extends React.Component {
     let photo = { uri: image.uri, type: "image/jpg", name: "image.jpg" };
     formData.append("image", photo);
 
+    this.setState({ processingOCR: true });
     fetch(requestAddress, {
       method: "POST",
       headers: {
@@ -81,7 +83,10 @@ export default class ImagePickerScreen extends React.Component {
     })
     .then((response) => response.json())
     .then((responseJson) => {
-      this.setState({ ocrResult: responseJson });
+      this.setState({
+                      ocrResult: responseJson,
+                      processingOCR: false 
+                    });
     })
     .catch((error) => {
       Alert.alert(
@@ -122,59 +127,14 @@ export default class ImagePickerScreen extends React.Component {
       </View>;
   }
 
-  // renderSubmitButton() {
-  //   const submitImage = async () => {
-  //     const { serverAddress, serverPort, ocrEndpoint } = Constants.manifest.extra;
-  //     const requestAddress = `http://${serverAddress}:${serverPort}${ocrEndpoint}`;
-  //     const { selection } = this.state;
 
-  //     let formData = new FormData();
-  //     let photo = {
-  //       uri: selection.uri,
-  //       type: "image/jpg",
-  //       name: "image.jpg"
-  //     }
-  //     formData.append("image", photo);
-
-  //     fetch(requestAddress, {
-  //       method: "POST",
-  //       headers: {
-  //         "Accept": "application/json",
-  //         "Content-Type": "multipart/form-data"
-  //       },
-  //       body: formData
-  //     })
-  //     .then((response) => response.json())
-  //     .then((responseJson) => {
-  //       this.setState({ocrResult: responseJson});
-  //     })
-  //     .catch((error) => {
-  //       Alert.alert(
-  //         'Network Request Failed',
-  //         'Please verify that the Server Address and Port, found in the Settings tab, are correct and that the backend server is running.',
-  //         [
-  //           {text: 'OK', onPress: () => console.log('Pressed OK')}
-  //         ],
-  //         { cancelable: false}
-  //       )
-  //     })
-  //   };
-
-  //   return (
-  //     <View>
-  //       <Button onPress={submitImage} title="Process Image" />
-  //     </View>
-  //   );
-  // }
-
-  renderPostResultButton() {
+  renderConfirmButtons() {
     const submitPollTape = async () => {
       const { serverAddress, serverPort, verifiedEndpoint } = Constants.manifest.extra;
       const requestAddress = `http://${serverAddress}:${serverPort}${verifiedEndpoint}`;
       const { ocrResult } = this.state;
 
-      const body = JSON.stringify({"message": ocrResult.output});
-      console.log(body);
+      const body = JSON.stringify({ "message": ocrResult.output });
 
       fetch(requestAddress, {
         method: "POST",
@@ -184,18 +144,37 @@ export default class ImagePickerScreen extends React.Component {
         },
         body
       })
-      .then(response => response.json())
-      .then(responseJson => {
-        this.setState({ postVerifiedResult: responseJson });
-      })
-      .catch(error => {
-        console.log(error);
-      });
+        .then(response => response.json())
+        .then(responseJson => {
+          this.setState({ postVerifiedResult: responseJson });
+        })
+        .catch(error => {
+          console.log(error);
+        });
     };
+
+    const rejectPollTape = async => {
+      this.setState(
+        {
+          image: null,
+          ocrResult: null
+        }
+      )
+    }
 
     return (
       <View>
-          <Button onPress={submitPollTape} title="Post Poll Tape" />
+        <View>
+          <MonoText>Does the information presented above match the poll tape?</MonoText>
+        </View>
+        <View style={{ padding: 10, flexDirection: 'row', flex: 1, width: '100%' }}>
+          <View style={styles.confirmButton}>
+            <Button onPress={rejectPollTape} title="No" color={"red"} />
+          </View>
+          <View style={styles.confirmButton}>
+            <Button onPress={submitPollTape} title="Yes" color={"green"} />
+          </View>
+        </View>
       </View>
     );
   }
@@ -205,6 +184,11 @@ export default class ImagePickerScreen extends React.Component {
 const styles = StyleSheet.create({
   main: {
     padding: 10,
-    flex: 1
+    flex: 1,
+    width: '100%'
+  },
+  confirmButton: {
+    width: '50%',
+    padding: 10
   }
 });
