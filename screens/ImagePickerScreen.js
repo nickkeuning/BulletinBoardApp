@@ -73,7 +73,12 @@ export default class ImagePickerScreen extends React.Component {
     let photo = { uri: image.uri, type: "image/jpg", name: "image.jpg" };
     formData.append("image", photo);
 
-    this.setState({ processingOCR: true });
+    this.setState(
+      {
+        processingOCR: true,
+        ocrResult: null,
+        postVerifiedResult: null
+      });
     fetch(requestAddress, {
       method: "POST",
       headers: {
@@ -147,7 +152,13 @@ export default class ImagePickerScreen extends React.Component {
       })
         .then(response => response.json())
         .then(responseJson => {
-          this.setState({ postVerifiedResult: responseJson });
+          this.setState(
+            {
+              image: null,
+              ocrResult: null,
+              postVerifiedResult: responseJson
+            }
+          );
         })
         .catch(error => {
           console.log(error);
