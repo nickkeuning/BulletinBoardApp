@@ -26,6 +26,7 @@ export default class ImagePickerScreen extends React.Component {
 
   async componentDidFocus() {
     await Permissions.askAsync(Permissions.CAMERA);
+    await Permissions.askAsync(Permissions.CAMERA_ROLL);
   }
 
   render() {
