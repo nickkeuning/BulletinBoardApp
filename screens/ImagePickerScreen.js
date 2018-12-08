@@ -38,14 +38,17 @@ export default class ImagePickerScreen extends React.Component {
     const { processingOCR } = this.state;
     const procOcrRender = !processingOCR ? (null) : (<Text>Loading, please wait...</Text>);
 
+    // const { ocrResult } = this.state;
+    // const ocrResultRender =
+    //   !ocrResult ? (null) : (<MonoText>{JSON.stringify(ocrResult.output)}</MonoText>);
     const { ocrResult } = this.state;
     const ocrResultRender =
-      !ocrResult ? (null) : (<MonoText>{JSON.stringify(ocrResult.output)}</MonoText>);
+      !ocrResult ? (null) : (this.renderOCRResult());
 
     const confirmButtons =
       !ocrResult ? (null) : (this.renderConfirmButtons());
 
-    const { postVerifiedResult } = this.state;
+	  const { postVerifiedResult } = this.state;
     const postVerifiedResultRender =
       !postVerifiedResult ? (null) : (<MonoText>{postVerifiedResult}</MonoText>)
 
@@ -133,6 +136,29 @@ export default class ImagePickerScreen extends React.Component {
       </View>;
   }
 
+  renderOCRResult() {
+    const { ocrResult } = this.state;
+    
+    return (
+      <View>
+        <Text>
+          District: {ocrResult.district}
+          Precinct: {ocrResult.precinct}
+          Date: {ocrResult.date}
+          Time: {ocrResult.time}
+          Ballots Cast: {ocrResult.ballots_cast}
+          {ocrResult.races.map(race =>
+            <Text>{race.race_name}</Text>,
+            race.candidates.map(candidate =>
+              <Text>
+                {candidate.name}   {candidate.votes}
+              </Text>
+            )
+          )}
+        </Text>
+      </View>
+    )
+  }
 
   renderConfirmButtons() {
     const submitPollTape = async () => {
