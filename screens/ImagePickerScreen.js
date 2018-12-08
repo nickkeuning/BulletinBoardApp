@@ -21,7 +21,8 @@ export default class ImagePickerScreen extends React.Component {
     image: null,
     ocrResult: null,
     postVerifiedResult: null,
-    processingOCR: false
+    processingOCR: false,
+    ocrError: false
   };
 
   async componentDidFocus() {
@@ -90,23 +91,31 @@ export default class ImagePickerScreen extends React.Component {
       },
       body: formData
     })
-    .then((response) => response.json())
-    .then((responseJson) => {
-      this.setState({
-                      ocrResult: responseJson,
-                      processingOCR: false 
-                    });
-    })
-    .catch((error) => {
-      Alert.alert(
-        'Network Request Failed',
-        'Please verify that the Server Address and Port, found in the Settings tab, are correct and that the backend server is running.',
-        [
-          { text: 'OK', onPress: () => console.log('Pressed OK') }
-        ],
-        { cancelable: false }
-      )
-    }) 
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({
+          ocrResult: responseJson,
+          processingOCR: false,
+          ocrError: "error" in responseJson
+        });
+      })
+      .catch((error) => {
+        Alert.alert(
+          'Network Request Failed',
+          'Please verify that the Server Address and Port, found in the Settings tab, are correct, and that the backend server is running.',
+          [
+            { text: 'OK', onPress: () => console.log('Pressed OK') }
+          ],
+          { cancelable: false }
+        )
+      })
+  }
+
+  renderOcrResult() {
+
+    !ocrResult ? (null) : (
+      "error" in ocrResult ? <MonoText>{ocrResult.error}</MonoText> :
+        <MonoText>{JSON.stringify(ocrResult.output)}</MonoText>);
   }
 
   renderCamera() {
@@ -120,7 +129,7 @@ export default class ImagePickerScreen extends React.Component {
       }
     };
 
-    return(
+    return (
       <Button onPress={showCamera} title="Take Photo of Poll Tape" />
     );
   }
@@ -130,10 +139,10 @@ export default class ImagePickerScreen extends React.Component {
     const { image } = this.state;
 
     return <View style={{ marginVertical: 16 }}>
-        <View style={{ marginBottom: 10, alignItems: "center", justifyContent: "center", flex: 1, backgroundColor: "#000000" }}>
-          <Image source={{ uri: image.uri }} style={{ width: 300, height: 300, resizeMode: "contain" }} />
-        </View>
-      </View>;
+      <View style={{ marginBottom: 10, alignItems: "center", justifyContent: "center", flex: 1, backgroundColor: "#000000" }}>
+        <Image source={{ uri: image.uri }} style={{ width: 300, height: 300, resizeMode: "contain" }} />
+      </View>
+    </View>;
   }
 
   renderOCRResult() {
@@ -198,6 +207,10 @@ export default class ImagePickerScreen extends React.Component {
           ocrResult: null
         }
       )
+    }
+
+    if (this.state.ocrError) {
+      return null;
     }
 
     return (
