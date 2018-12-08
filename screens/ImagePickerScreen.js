@@ -40,7 +40,9 @@ export default class ImagePickerScreen extends React.Component {
 
     const { ocrResult } = this.state;
     const ocrResultRender =
-      !ocrResult ? (null) : (<MonoText>{JSON.stringify(ocrResult.output)}</MonoText>);
+      !ocrResult ? (null) : (
+        "error" in ocrResult ? <MonoText>{ocrResult.error}</MonoText> : 
+                               <MonoText>{JSON.stringify(ocrResult.output)}</MonoText>);
 
     const confirmButtons =
       !ocrResult ? (null) : (this.renderConfirmButtons());
