@@ -39,9 +39,6 @@ export default class ImagePickerScreen extends React.Component {
     const { processingOCR } = this.state;
     const procOcrRender = !processingOCR ? (null) : (<Text>Loading, please wait...</Text>);
 
-    // const { ocrResult } = this.state;
-    // const ocrResultRender =
-    //   !ocrResult ? (null) : (<MonoText>{JSON.stringify(ocrResult.output)}</MonoText>);
     const { ocrResult } = this.state;
     const ocrResultRender =
       !ocrResult ? (null) : (this.renderOCRResult());
@@ -102,7 +99,9 @@ export default class ImagePickerScreen extends React.Component {
       .catch((error) => {
         Alert.alert(
           'Network Request Failed',
-          'Please verify that the Server Address and Port, found in the Settings tab, are correct, and that the backend server is running.',
+          "Please verify that the Server Address and Port " +
+           "(found in the Settings tab) are correct, " +
+           "and that the backend server is running.",
           [
             { text: 'OK', onPress: () => console.log('Pressed OK') }
           ],

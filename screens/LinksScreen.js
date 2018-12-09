@@ -22,18 +22,10 @@ export default class LinksScreen extends React.Component {
                     background={Touchable.Ripple('#ccc', false)}
                     onPress={this._handlePressDocs}>
                     <View style={{ flexDirection: 'row' }}>
-                        <View style={styles.optionIconContainer}>
-                            <Image
-                                source={require('../assets/images/expo-icon.png')}
-                                resizeMode="contain"
-                                fadeDuration={0}
-                                style={{ width: 20, height: 20, marginTop: 1 }}
-                            />
-                        </View>
                         <View style={styles.optionTextContainer}>
                             <Text style={styles.optionText}>
-                                Read the Expo documentation
-              </Text>
+                                Read about the crypto behind this app
+                            </Text>
                         </View>
                     </View>
                 </Touchable>
@@ -43,17 +35,10 @@ export default class LinksScreen extends React.Component {
                     style={styles.option}
                     onPress={this._handlePressSlack}>
                     <View style={{ flexDirection: 'row' }}>
-                        <View style={styles.optionIconContainer}>
-                            <Image
-                                source={require('../assets/images/slack-icon.png')}
-                                fadeDuration={0}
-                                style={{ width: 20, height: 20 }}
-                            />
-                        </View>
                         <View style={styles.optionTextContainer}>
                             <Text style={styles.optionText}>
-                                Join us on Slack
-              </Text>
+                                Check out the EECS 498 class page
+                            </Text>
                         </View>
                     </View>
                 </Touchable>
@@ -63,13 +48,10 @@ export default class LinksScreen extends React.Component {
                     background={Touchable.Ripple('#ccc', false)}
                     onPress={this._handlePressForums}>
                     <View style={{ flexDirection: 'row' }}>
-                        <View style={styles.optionIconContainer}>
-                            <Ionicons name="ios-chatboxes" size={22} color="#ccc" />
-                        </View>
                         <View style={styles.optionTextContainer}>
                             <Text style={styles.optionText}>
-                                Ask a question on the Expo forums
-              </Text>
+                                Explore the work of J. Alex Halderman
+                            </Text>
                         </View>
                     </View>
                 </Touchable>
@@ -78,15 +60,15 @@ export default class LinksScreen extends React.Component {
     }
 
     _handlePressSlack = () => {
-        WebBrowser.openBrowserAsync('https://slack.expo.io');
+        WebBrowser.openBrowserAsync("https://www.eecs.umich.edu/courses/eecs498.009/");
     };
 
     _handlePressDocs = () => {
-        WebBrowser.openBrowserAsync('http://docs.expo.io');
+        WebBrowser.openBrowserAsync("http://epubs.surrey.ac.uk/107392/5/append-only.pdf");
     };
 
     _handlePressForums = () => {
-        WebBrowser.openBrowserAsync('http://forums.expo.io');
+        WebBrowser.openBrowserAsync("https://jhalderm.com/");
     };
 }
 
