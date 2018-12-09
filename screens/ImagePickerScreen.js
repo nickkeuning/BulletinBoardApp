@@ -111,13 +111,6 @@ export default class ImagePickerScreen extends React.Component {
       })
   }
 
-  renderOcrResult() {
-
-    !ocrResult ? (null) : (
-      "error" in ocrResult ? <MonoText>{ocrResult.error}</MonoText> :
-        <MonoText>{JSON.stringify(ocrResult.output)}</MonoText>);
-  }
-
   renderCamera() {
     const showCamera = async () => {
       let result = await ImagePicker.launchCameraAsync({});
@@ -147,26 +140,33 @@ export default class ImagePickerScreen extends React.Component {
 
   renderOCRResult() {
     const { ocrResult } = this.state;
-    
-    return (
-      <View>
-        <Text>
-          District: {ocrResult.district}
-          Precinct: {ocrResult.precinct}
-          Date: {ocrResult.date}
-          Time: {ocrResult.time}
-          Ballots Cast: {ocrResult.ballots_cast}
-          {ocrResult.races.map(race =>
-            <Text>{race.race_name}</Text>,
-            race.candidates.map(candidate =>
-              <Text>
-                {candidate.name}   {candidate.votes}
-              </Text>
-            )
-          )}
-        </Text>
-      </View>
-    )
+
+    if ("error" in ocrResult) {
+      // error
+      return (<MonoText>{ocrResult.error}</MonoText>);
+    } else {
+      // not error
+      output = ocrResult.output;
+      return <View>
+          <MonoText>
+            District: {output.district} {"\n"}
+            Precinct: {output.precinct} {"\n"}
+            Date: {output.date} {"\n"}
+            Time: {output.time} {"\n"}
+            Ballots Cast: {output.ballots_cast} {"\n"} {"\n"}
+            {output.races.map(race =>
+              (<Text key={race.race_name}>
+                <Text>{race.race_name} {"\n"}</Text>
+                {race.candidates.map(candidate =>
+                  (<Text key={candidate.name}>
+                      {candidate.name}{"  "}{candidate.votes}{"\n"}
+                  </Text>)
+                )} {"\n"}
+              </Text>)
+            )}
+          </MonoText>
+        </View>;
+    }
   }
 
   renderConfirmButtons() {
