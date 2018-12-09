@@ -37,7 +37,7 @@ export default class ImagePickerScreen extends React.Component {
     const imageRender = !image ? null : this.renderImage();
 
     const { processingOCR } = this.state;
-    const procOcrRender = !processingOCR ? (null) : (<Text>Loading, please wait...</Text>);
+    const procOcrRender = !processingOCR ? (null) : (<MonoText>Loading, please wait...</MonoText>);
 
     const { ocrResult } = this.state;
     const ocrResultRender =
