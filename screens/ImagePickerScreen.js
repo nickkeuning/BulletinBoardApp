@@ -143,11 +143,27 @@ export default class ImagePickerScreen extends React.Component {
 
     if ("error" in ocrResult) {
       // error
-      return (<MonoText>{ocrResult.error}</MonoText>);
+      error_message = "An error occurred while processing this poll tape. See below for details.";
+      recommendation_message =
+        "Please re-take the image to try again\n" +
+        "Tips to improve image quality:\n" +
+        "    - Capture the entire poll tape in the image.\n" +
+        "    - Center the poll tape in the image.\n" +
+        "    - Make sure there are no shadows on the poll tape.\n" +
+        "    - Use flash if several attempts without flash fail.\n" +
+        "    - Make sure the poll tape is completely flat.";
+      return <View>
+          <MonoText>{error_message}</MonoText>
+          <MonoText>
+            {"Errors reported by server:\n\n"}
+            {ocrResult.error}
+          </MonoText>
+          <MonoText>{recommendation_message}</MonoText>
+        </View>;
     } else {
       // not error
       output = ocrResult.output;
-      return <View>
+      return (
           <MonoText>
             District: {output.district} {"\n"}
             Precinct: {output.precinct} {"\n"}
@@ -165,7 +181,7 @@ export default class ImagePickerScreen extends React.Component {
               </Text>)
             )}
           </MonoText>
-        </View>;
+      );
     }
   }
 
