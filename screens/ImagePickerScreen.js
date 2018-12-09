@@ -144,7 +144,7 @@ export default class ImagePickerScreen extends React.Component {
       // error
       error_message = "An error occurred while processing this poll tape. See below for details.";
       recommendation_message =
-        "Please re-take the image to try again\n" +
+        "Please re-take the image to try again.\n" +
         "Tips to improve image quality:\n" +
         "    - Capture the entire poll tape in the image.\n" +
         "    - Center the poll tape in the image.\n" +
